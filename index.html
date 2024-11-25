@@ -1,10 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAYTON</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            animation: backgroundColorAnimation 10s infinite alternate;
+            background: #e6e6e6;
+        }
+
+        @keyframes backgroundColorAnimation {
+            0% { background-color: #5527b7; }
+            50% { background-color: #5527b7; }
+            100% { background-color: #5527b7; }
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ececec;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 150px;
+            height: auto;
+            cursor: pointer;
+            animation: pulse 8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="container">
+        <h1 class="title">PLAYTON</h1>
+        <a href="pagina-siguiente.html">
+            <img src="logo.png" alt="Logo de la Página" class="logo">
+        </a>
+    </div>
 </body>
 </html>

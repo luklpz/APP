@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Principal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    /* General */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* Contenedor principal */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Barra de búsqueda */
+.search-bar {
+    background-color: #4a148c; /* Color morado */
+    padding: 10px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+}
+
+/* Contenedor de juegos */
+.games-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 10px;
+    background-color: #4a148c; /* Fondo morado */
+    overflow-y: auto;
+}
+
+.game-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.game-card img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.game-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.game-score {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Barra de navegación inferior */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.nav-item {
+    text-align: center;
+    color: #000;
+    font-size: 14px;
+}
+
+.nav-item img {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 5px;
+}
+
+.nav-item.active img {
+    filter: brightness(0) saturate(100%) invert(19%) sepia(90%) saturate(5072%) hue-rotate(239deg) brightness(92%) contrast(128%);
+}
+
+.nav-item.active span {
+    color: #4a148c;
+}
+</style>
+<body>
+    <div class="container">
+        <!-- Barra de búsqueda -->
+        <header class="search-bar">
+            <input type="text" placeholder="Buscar un videojuego..." id="search-input">
+        </header>
+
+        <!-- Contenido principal -->
+        <main class="games-container">
+            <!-- Los cuadrados de juegos se cargarán dinámicamente desde la API -->
+            <div class="game-card">
+                <img src="https://via.placeholder.com/150" alt="Imagen del juego">
+                <h3 class="game-title">Título</h3>
+                <p class="game-score">Puntuación: 85</p>
+            </div>
+            <!-- Repetir este bloque para más juegos -->
+        </main>
+
+        <!-- Barra de navegación -->
+        <footer class="bottom-nav">
+            <div class="nav-item active">
+                <img src="" alt="Inicio">
+                <span>Inicio</span>
+            </div>
+            <div class="nav-item">
+                <img src="https://via.placeholder.com/24/000000/FFFFFF?text=🔍" alt="Buscar">
+                <span>Buscar</span>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
