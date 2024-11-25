@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Principal</title>
+    <style>
+        /* General */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Barra de búsqueda */
+        .search-bar {
+            background-color: #4a148c; /* Color morado */
+            padding: 10px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Contenedor de juegos */
+        .games-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 30px;
+            background-color: #4a148c; /* Fondo morado */
+            overflow-y: auto;
+        }
+
+        .game-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-card img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .game-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .game-score {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Barra de navegación inferior */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .nav-item img {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active img {
+            filter: brightness(0) saturate(100%) invert(19%) sepia(90%) saturate(5072%) hue-rotate(239deg) brightness(92%) contrast(128%);
+        }
+
+        .nav-item.active span {
+            color: #4a148c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Barra de búsqueda -->
+        <header class="search-bar">
+            <input type="text" placeholder="Buscar un videojuego..." id="search-input">
+        </header>
+
+        <!-- Contenido principal -->
+        <main class="games-container">
+            <!-- Los cuadros se cargarán dinámicamente -->
+        </main>
+
+        <!-- Barra de navegación -->
+        <footer class="bottom-nav">
+            <div class="nav-item">
+                <img src="inicio.jpg" alt="Inicio">
+            </div>
+            <div class="nav-item">
+                <img src="buscar.png" alt="Buscar">
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // API Key de RAWG
+        const API_KEY = "2argt66rvxxr9afd";
+        const API_URL = `https://api.rawg.io/api/games?key=${API_KEY}`;
+
+        // Contenedor para los juegos
+        const gamesContainer = document.querySelector(".games-container");
+
+        // Función para obtener juegos desde la API
+        async function fetchGames() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                // Filtramos para evitar duplicados y obtener solo juegos únicos
+                const uniqueGames = getUniqueGames(data.results);
+
+                // Renderizamos las cajas de juegos en pantalla
+                renderGames(uniqueGames);
+            } catch (error) {
+                console.error("Error al cargar los juegos:", error);
+            }
+        }
+
+        // Función para filtrar juegos únicos
+        function getUniqueGames(games) {
+            const seen = new Set();
+            return games.filter((game) => {
+                if (seen.has(game.id)) return false;
+                seen.add(game.id);
+                return true;
+            });
+        }
+
+        // Función para renderizar los juegos en la pantalla
+        function renderGames(games) {
+            gamesContainer.innerHTML = ""; // Limpiamos el contenedor
+
+            // Creamos las cajas dinámicamente
+            games.forEach((game) => {
+                const gameCard = document.createElement("div");
+                gameCard.classList.add("game-card");
+
+                // Estructura de la tarjeta del juego
+                gameCard.innerHTML = `
+                    <img src="${game.background_image}" alt="${game.name}" loading="lazy">
+                    <h3 class="game-title">${game.name}</h3>
+                    <p class="game-score">Puntuación: ${game.rating}</p>
+                `;
+
+                // Agregamos la tarjeta al contenedor
+                gamesContainer.appendChild(gameCard);
+            });
+        }
+
+        // Llamamos a la función al cargar la página
+        fetchGames();
+    </script>
+</body>
+</html>
