@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Videojuego</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Encabezado */
+        .header {
+            background-color: #4a148c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Contenedor principal */
+        .game-details-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4a148c;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            margin-bottom: 20px;
+        }
+
+        .game-info p {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .game-description {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .back-button {
+            display: block;
+            text-align: center;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: #4a148c;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #6a1b9a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Detalles del Videojuego</div>
+
+    <div class="game-details-container" id="gameDetails">
+        <!-- Aquí se rellenará dinámicamente la información del juego -->
+    </div>
+
+    <a href="index.html" class="back-button">Volver a la pantalla principal</a>
+
+    <script>
+        const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
+        const gameDetailsContainer = document.getElementById("gameDetails");
+
+        // Recuperar el término de búsqueda de localStorage
+        const query = localStorage.getItem("gameSearchQuery");
+
+        if (!query) {
+            gameDetailsContainer.innerHTML = "<p>No se proporcionó ningún término de búsqueda.</p>";
+        } else {
+            fetchGameDetails(query);
+        }
+
+        async function fetchGameDetails(query) {
+            const API_URL = `https://api.rawg.io/api/games?key=${API_KEY}&search=${query}`;
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`Error al buscar el juego: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    const game = data.results[0]; // Tomar el primer resultado relevante
+                    renderGameDetails(game);
+                } else {
+                    gameDetailsContainer.innerHTML = "<p>No se encontraron resultados para el juego.</p>";
+                }
+            } catch (error) {
+                console.error("Error al obtener detalles del juego:", error);
+                gameDetailsContainer.innerHTML = "<p>Error al cargar los detalles del juego.</p>";
+            }
+        }
+
+        function renderGameDetails(game) {
+            gameDetailsContainer.innerHTML = `
+                <img src="${game.background_image}" alt="${game.name}" class="game-image">
+                <h1 class="game-title">${game.name}</h1>
+                <div class="game-info">
+                    <p><strong>Géneros:</strong> ${game.genres.map(genre => genre.name).join(", ")}</p>
+                    <p><strong>Plataformas:</strong> ${game.platforms.map(p => p.platform.name).join(", ")}</p>
+                    <p><strong>Fecha de lanzamiento:</strong> ${game.released || "No disponible"}</p>
+                    <p><strong>Puntuación:</strong> ${game.rating || "Sin calificar"}</p>
+                </div>
+                <div class="game-description">
+                    <p>${game.description || "No hay descripción disponible para este juego."}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
