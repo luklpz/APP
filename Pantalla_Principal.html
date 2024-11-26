@@ -220,15 +220,21 @@
         function renderGames(games) {
             gamesContainer.innerHTML = "";
 
-            games.forEach((game) => {
+            games.forEach(game => {
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
 
                 gameCard.innerHTML = `
-                    <img src="${game.background_image}" alt="${game.name}">
+                    <img src="${game.background_image}" alt="${game.name}" class="game-image">
                     <h3 class="game-title">${game.name}</h3>
-                    <p class="game-score">Puntuación: ${game.rating}</p>
+                    <p class="game-rating">Puntuación: ${game.rating}</p>
                 `;
+
+                // Agregar evento de clic para redirigir a Pantalla Videojuego
+                gameCard.addEventListener("click", () => {
+                    localStorage.setItem("selectedGameId", game.id); // Guardar el ID del juego en localStorage
+                    window.location.href = "pantalla-videojuego.html"; // Redirigir
+                });
 
                 gamesContainer.appendChild(gameCard);
             });
@@ -250,6 +256,14 @@
             query = searchBar.value.trim();
             currentPage = 1;
             fetchGames(currentPage, query);
+        });
+
+        searchBar.addEventListener("input", () => {
+            query = searchBar.value.trim();
+            if (query) {
+                localStorage.setItem("gameSearchQuery", query); // Guardar el término de búsqueda
+                window.location.href = "pantalla-videojuego.html"; // Redirigir a la nueva pantalla
+            }
         });
 
         fetchGames(currentPage);
