@@ -15,7 +15,7 @@
 
         /* Barra de búsqueda */
         .search-bar-container {
-            background-color: #4a148c; /* Morado oscuro */
+            background-color: #4a148c;
             padding: 10px;
             display: flex;
             justify-content: center;
@@ -38,9 +38,9 @@
             gap: 10px;
             padding: 20px;
             background-color: #fff;
+            padding-bottom: 80px;
         }
 
-        /* Cuadro individual de cada juego */
         .game-card {
             background-color: #f4f4f4;
             border-radius: 10px;
@@ -77,33 +77,39 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 10px 20px;
             background-color: #f4f4f4;
+            position: fixed;
+            bottom: 60px;
+            width: 100%;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .pagination-container button {
-            background-color: #4a148c;
-            color: white;
+            background: none;
             border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            margin: 0 5px;
-            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .pagination-container button:hover {
-            background-color: #6a1b9a;
-        }
-
-        .pagination-container span {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 16px;
-            margin: 0 10px;
-            color: #333;
+            color: white;
         }
 
-        /* Footer con navegación */
+        .pagination-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-container .page-number {
+            font-size: 16px;
+            color: #4a148c;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+
+        /* Footer */
         .footer {
             background-color: #4a148c;
             color: white;
@@ -128,10 +134,11 @@
         .footer-icon img {
             width: 24px;
             height: 24px;
+            filter: brightness(2); /* Iconos blancos */
         }
 
         .footer-icon.active img {
-            filter: brightness(2); /* Resalta el icono activo */
+            filter: brightness(2);
         }
     </style>
 </head>
@@ -148,17 +155,21 @@
 
     <!-- Contenedor de juegos -->
     <div class="games-container" id="gamesContainer">
-        <!-- Aquí se renderizan los cuadros dinámicamente -->
+        <!-- Juegos dinámicamente renderizados -->
     </div>
 
     <!-- Controles de paginación -->
     <div class="pagination-container">
-        <button id="prevPage">Anterior</button>
-        <span id="pageNumber">Página 1</span>
-        <button id="nextPage">Siguiente</button>
+        <button id="prevPage" aria-label="Página anterior" disabled>
+            &#9664; <!-- Flecha izquierda -->
+        </button>
+        <span id="pageNumber" class="page-number">1</span>
+        <button id="nextPage" aria-label="Página siguiente">
+            &#9654; <!-- Flecha derecha -->
+        </button>
     </div>
 
-    <!-- Footer de navegación -->
+    <!-- Footer -->
     <div class="footer">
         <a href="#" class="footer-icon active">
             <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Inicio">
@@ -171,50 +182,43 @@
     </div>
 
     <script>
-        // Clave de API
-        const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
+        const API_KEY = "2argt66rvxxr9afd";
 
-        // Elementos del DOM
         const searchBar = document.getElementById("searchBar");
         const gamesContainer = document.getElementById("gamesContainer");
         const prevPageButton = document.getElementById("prevPage");
         const nextPageButton = document.getElementById("nextPage");
         const pageNumberDisplay = document.getElementById("pageNumber");
 
-        // Estado para controlar la paginación
         let currentPage = 1;
         let query = "";
 
-        // Función para obtener los videojuegos
         async function fetchGames(page = 1, searchQuery = "") {
             const API_URL = searchQuery
                 ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}`
                 : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}`;
 
             try {
-                // Hacemos la llamada a la API
                 const response = await fetch(API_URL);
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.status}`);
                 }
 
                 const data = await response.json();
-
-                // Renderizamos los juegos en pantalla
                 renderGames(data.results);
-                pageNumberDisplay.textContent = `Página ${currentPage}`;
+
+                pageNumberDisplay.textContent = page;
+                prevPageButton.disabled = page === 1; // Deshabilitar si es la primera página
             } catch (error) {
                 console.error("Error al obtener los juegos:", error);
                 gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
             }
         }
 
-        // Función para renderizar los videojuegos
         function renderGames(games) {
-            gamesContainer.innerHTML = ""; // Limpiamos el contenedor
+            gamesContainer.innerHTML = "";
 
             games.forEach((game) => {
-                // Crear un cuadro por cada videojuego
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
 
@@ -224,12 +228,10 @@
                     <p class="game-score">Puntuación: ${game.rating}</p>
                 `;
 
-                // Agregamos el cuadro al contenedor
                 gamesContainer.appendChild(gameCard);
             });
         }
 
-        // Eventos de paginación
         prevPageButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -242,14 +244,12 @@
             fetchGames(currentPage, query);
         });
 
-        // Evento para la barra de búsqueda
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
-            currentPage = 1; // Reinicia a la primera página
+            currentPage = 1;
             fetchGames(currentPage, query);
         });
 
-        // Cargar videojuegos al inicio
         fetchGames(currentPage);
     </script>
 </body>
