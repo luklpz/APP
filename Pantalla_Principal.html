@@ -19,6 +19,7 @@
             padding: 10px;
             display: flex;
             justify-content: center;
+            position: relative;
         }
 
         .search-bar {
@@ -29,6 +30,88 @@
             border-radius: 5px;
             border: 1px solid #ccc;
             outline: none;
+        }
+
+        /* Botón lupa para abrir el menú */
+        .search-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .search-icon {
+            width: 30px;
+            height: auto;
+        }
+
+        /* Menú de géneros */
+        .genre-menu {
+            display: none; /* Inicialmente oculto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .genre-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .close-button {
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .close-button:hover {
+            background-color: #6a1b9a;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .genre-list {
+            margin-bottom: 20px;
+        }
+
+        .genre-item {
+            margin-bottom: 10px;
+        }
+
+        .apply-filters {
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .apply-filters:hover {
+            background-color: #6a1b9a;
         }
 
         /* Contenedor de juegos */
@@ -153,6 +236,21 @@
             class="search-bar"
             placeholder="Buscar videojuegos..."
         />
+        <button id="searchButton" class="search-button">
+            <img src="lupa-icono.svg" alt="Buscar" class="search-icon">
+        </button>
+    </div>
+
+    <!-- Menú desplegable de géneros -->
+    <div id="genreMenu" class="genre-menu">
+        <div class="genre-menu-header">
+            <button id="closeButton" class="close-button">Cerrar</button>
+            <h2>Selecciona los géneros</h2>
+        </div>
+        <div class="genre-list">
+            <!-- Aquí se agregarán los géneros dinámicamente -->
+        </div>
+        <button id="applyFilters" class="apply-filters">Aplicar filtros</button>
     </div>
 
     <!-- Contenedor de juegos -->
@@ -185,20 +283,51 @@
 
     <script>
         const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
-
         const searchBar = document.getElementById("searchBar");
         const gamesContainer = document.getElementById("gamesContainer");
         const prevPageButton = document.getElementById("prevPage");
         const nextPageButton = document.getElementById("nextPage");
         const pageNumberDisplay = document.getElementById("pageNumber");
+        const searchButton = document.getElementById("searchButton");
+        const genreMenu = document.getElementById("genreMenu");
+        const closeButton = document.getElementById("closeButton");
+        const applyFiltersButton = document.getElementById("applyFilters");
+        const genreList = document.querySelector(".genre-list");
 
         let currentPage = 1;
         let query = "";
+        let selectedGenres = [];
 
-        async function fetchGames(page = 1, searchQuery = "") {
+        async function fetchGenres() {
+            const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                renderGenres(data.results);
+            } catch (error) {
+                console.error("Error al obtener géneros:", error);
+            }
+        }
+
+        function renderGenres(genres) {
+            genreList.innerHTML = "";
+            genres.forEach(genre => {
+                const genreItem = document.createElement("div");
+                genreItem.classList.add("genre-item");
+                genreItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${genre.id}" /> ${genre.name}
+                    </label>
+                `;
+                genreList.appendChild(genreItem);
+            });
+        }
+
+        async function fetchGames(page = 1, searchQuery = "", genres = []) {
+            let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
-                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}`
-                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}`;
+                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}${genreQuery}`
+                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}${genreQuery}`;
 
             try {
                 const response = await fetch(API_URL);
@@ -210,7 +339,7 @@
                 renderGames(data.results);
 
                 pageNumberDisplay.textContent = page;
-                prevPageButton.disabled = page === 1; // Deshabilitar si es la primera página
+                prevPageButton.disabled = page === 1;
             } catch (error) {
                 console.error("Error al obtener los juegos:", error);
                 gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
@@ -230,10 +359,9 @@
                     <p class="game-rating">Puntuación: ${game.rating}</p>
                 `;
 
-                // Agregar evento de clic para redirigir a Pantalla Videojuego
                 gameCard.addEventListener("click", () => {
-                    localStorage.setItem("selectedGameId", game.id); // Guardar el ID del juego en localStorage
-                    window.location.href = "pantalla-videojuego.html"; // Redirigir
+                    localStorage.setItem("selectedGameId", game.id);
+                    window.location.href = "pantalla-videojuego.html";
                 });
 
                 gamesContainer.appendChild(gameCard);
@@ -243,29 +371,38 @@
         prevPageButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
-                fetchGames(currentPage, query);
+                fetchGames(currentPage, query, selectedGenres);
             }
         });
 
         nextPageButton.addEventListener("click", () => {
             currentPage++;
-            fetchGames(currentPage, query);
+            fetchGames(currentPage, query, selectedGenres);
+        });
+
+        searchButton.addEventListener("click", () => {
+            genreMenu.style.display = "block"; // Mostrar el menú de géneros
+        });
+
+        closeButton.addEventListener("click", () => {
+            genreMenu.style.display = "none"; // Cerrar el menú
+        });
+
+        applyFiltersButton.addEventListener("click", () => {
+            selectedGenres = [];
+            const checkboxes = document.querySelectorAll(".genre-item input:checked");
+            checkboxes.forEach(checkbox => selectedGenres.push(checkbox.value));
+            genreMenu.style.display = "none";
+            fetchGames(currentPage, query, selectedGenres);
         });
 
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
             currentPage = 1;
-            fetchGames(currentPage, query);
+            fetchGames(currentPage, query, selectedGenres);
         });
 
-        searchBar.addEventListener("input", () => {
-            query = searchBar.value.trim();
-            if (query) {
-                localStorage.setItem("gameSearchQuery", query); // Guardar el término de búsqueda
-                window.location.href = "pantalla-videojuego.html"; // Redirigir a la nueva pantalla
-            }
-        });
-
+        fetchGenres();
         fetchGames(currentPage);
     </script>
 </body>
