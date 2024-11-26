@@ -96,17 +96,17 @@
         const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
         const gameDetailsContainer = document.getElementById("gameDetails");
 
-        // Recuperar el término de búsqueda de localStorage
-        const query = localStorage.getItem("gameSearchQuery");
+        // Recuperar el ID del juego de localStorage
+        const gameId = localStorage.getItem("selectedGameId");
 
-        if (!query) {
-            gameDetailsContainer.innerHTML = "<p>No se proporcionó ningún término de búsqueda.</p>";
+        if (!gameId) {
+            gameDetailsContainer.innerHTML = "<p>No se seleccionó ningún juego.</p>";
         } else {
-            fetchGameDetails(query);
+            fetchGameDetails(gameId);
         }
 
-        async function fetchGameDetails(query) {
-            const API_URL = `https://api.rawg.io/api/games?key=${API_KEY}&search=${query}`;
+        async function fetchGameDetails(gameId) {
+            const API_URL = `https://api.rawg.io/api/games/${gameId}?key=${API_KEY}`;
 
             try {
                 const response = await fetch(API_URL);
@@ -114,13 +114,8 @@
                     throw new Error(`Error al buscar el juego: ${response.status}`);
                 }
 
-                const data = await response.json();
-                if (data.results && data.results.length > 0) {
-                    const game = data.results[0]; // Tomar el primer resultado relevante
-                    renderGameDetails(game);
-                } else {
-                    gameDetailsContainer.innerHTML = "<p>No se encontraron resultados para el juego.</p>";
-                }
+                const game = await response.json();
+                renderGameDetails(game);
             } catch (error) {
                 console.error("Error al obtener detalles del juego:", error);
                 gameDetailsContainer.innerHTML = "<p>Error al cargar los detalles del juego.</p>";
@@ -138,7 +133,7 @@
                     <p><strong>Puntuación:</strong> ${game.rating || "Sin calificar"}</p>
                 </div>
                 <div class="game-description">
-                    <p>${game.description || "No hay descripción disponible para este juego."}</p>
+                    <p>${game.description_raw || "No hay descripción disponible para este juego."}</p>
                 </div>
             `;
         }
