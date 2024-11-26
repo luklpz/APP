@@ -3,182 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantalla Principal</title>
+    <title>Videojuegos RAWG</title>
     <style>
-        /* General */
+        /* Estilos básicos */
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-        }
-
-        /* Contenedor principal */
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
         /* Barra de búsqueda */
-        .search-bar {
-            background-color: #4a148c; /* Color morado */
+        .search-bar-container {
+            background-color: #4a148c; /* Morado oscuro */
             padding: 10px;
+            display: flex;
+            justify-content: center;
         }
 
-        .search-bar input {
-            width: 100%;
+        .search-bar {
+            width: 90%;
+            max-width: 600px;
             padding: 10px;
             font-size: 16px;
-            border: none;
             border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
         }
 
         /* Contenedor de juegos */
         .games-container {
-            flex: 1;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 10px;
-            padding: 30px;
-            background-color: #4a148c; /* Fondo morado */
-            overflow-y: auto;
+            padding: 20px;
+            background-color: #fff;
         }
 
+        /* Cuadro individual de cada juego */
         .game-card {
-            background-color: #fff;
+            background-color: #f4f4f4;
             border-radius: 10px;
             padding: 10px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
         }
 
         .game-card img {
             width: 100%;
+            height: auto;
             border-radius: 5px;
-            margin-bottom: 10px;
         }
 
         .game-title {
             font-size: 16px;
+            margin: 10px 0 5px 0;
             font-weight: bold;
-            margin: 0;
+            color: #333;
         }
 
         .game-score {
             font-size: 14px;
-            color: #555;
+            color: #666;
         }
 
-        /* Barra de navegación inferior */
-        .bottom-nav {
+        /* Footer con navegación */
+        .footer {
+            background-color: #4a148c;
+            color: white;
+            padding: 10px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            background-color: #fff;
-            border-top: 1px solid #ccc;
-            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
 
-        .nav-item {
-            text-align: center;
-            color: #000;
+        .footer-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
             font-size: 14px;
+            text-decoration: none;
         }
 
-        .nav-item img {
+        .footer-icon img {
             width: 24px;
             height: 24px;
-            margin-bottom: 5px;
         }
 
-        .nav-item.active img {
-            filter: brightness(0) saturate(100%) invert(19%) sepia(90%) saturate(5072%) hue-rotate(239deg) brightness(92%) contrast(128%);
-        }
-
-        .nav-item.active span {
-            color: #4a148c;
+        .footer-icon.active img {
+            filter: brightness(2); /* Resalta el icono activo */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Barra de búsqueda -->
-        <header class="search-bar">
-            <input type="text" placeholder="Buscar un videojuego..." id="search-input">
-        </header>
+    <!-- Barra de búsqueda -->
+    <div class="search-bar-container">
+        <input
+            type="text"
+            id="searchBar"
+            class="search-bar"
+            placeholder="Buscar videojuegos..."
+        />
+    </div>
 
-        <!-- Contenido principal -->
-        <main class="games-container">
-            <!-- Los cuadros se cargarán dinámicamente -->
-        </main>
+    <!-- Contenedor de juegos -->
+    <div class="games-container" id="gamesContainer">
+        <!-- Aquí se renderizan los cuadros dinámicamente -->
+    </div>
 
-        <!-- Barra de navegación -->
-        <footer class="bottom-nav">
-            <div class="nav-item">
-                <img src="inicio.jpg" alt="Inicio">
-            </div>
-            <div class="nav-item">
-                <img src="buscar.png" alt="Buscar">
-            </div>
-        </footer>
+    <!-- Footer de navegación -->
+    <div class="footer">
+        <a href="#" class="footer-icon active">
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Inicio">
+            <span>Inicio</span>
+        </a>
+        <a href="#" class="footer-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Buscar">
+            <span>Buscar</span>
+        </a>
     </div>
 
     <script>
-        // API Key de RAWG
-        const API_KEY = "2argt66rvxxr9afd";
-        const API_URL = `https://api.rawg.io/api/games?key=${API_KEY}`;
+        // Clave de API
+        const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
 
-        // Contenedor para los juegos
-        const gamesContainer = document.querySelector(".games-container");
+        // Elementos del DOM
+        const searchBar = document.getElementById("searchBar");
+        const gamesContainer = document.getElementById("gamesContainer");
 
-        // Función para obtener juegos desde la API
-        async function fetchGames() {
+        // Función para obtener los videojuegos
+        async function fetchGames(query = "") {
+            const API_URL = query
+                ? `https://api.rawg.io/api/games?key=${API_KEY}&search=${query}`
+                : `https://api.rawg.io/api/games?key=${API_KEY}`;
+
             try {
+                // Hacemos la llamada a la API
                 const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.status}`);
+                }
+
                 const data = await response.json();
 
-                // Filtramos para evitar duplicados y obtener solo juegos únicos
-                const uniqueGames = getUniqueGames(data.results);
-
-                // Renderizamos las cajas de juegos en pantalla
-                renderGames(uniqueGames);
+                // Renderizamos los juegos en pantalla
+                renderGames(data.results);
             } catch (error) {
-                console.error("Error al cargar los juegos:", error);
+                console.error("Error al obtener los juegos:", error);
+                gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
             }
         }
 
-        // Función para filtrar juegos únicos
-        function getUniqueGames(games) {
-            const seen = new Set();
-            return games.filter((game) => {
-                if (seen.has(game.id)) return false;
-                seen.add(game.id);
-                return true;
-            });
-        }
-
-        // Función para renderizar los juegos en la pantalla
+        // Función para renderizar los videojuegos
         function renderGames(games) {
             gamesContainer.innerHTML = ""; // Limpiamos el contenedor
 
-            // Creamos las cajas dinámicamente
             games.forEach((game) => {
+                // Crear un cuadro por cada videojuego
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
 
-                // Estructura de la tarjeta del juego
                 gameCard.innerHTML = `
-                    <img src="${game.background_image}" alt="${game.name}" loading="lazy">
+                    <img src="${game.background_image}" alt="${game.name}">
                     <h3 class="game-title">${game.name}</h3>
                     <p class="game-score">Puntuación: ${game.rating}</p>
                 `;
 
-                // Agregamos la tarjeta al contenedor
+                // Agregamos el cuadro al contenedor
                 gamesContainer.appendChild(gameCard);
             });
         }
 
-        // Llamamos a la función al cargar la página
+        // Evento para la barra de búsqueda
+        searchBar.addEventListener("input", () => {
+            const query = searchBar.value.trim();
+            if (query.length > 2 || query.length === 0) {
+                fetchGames(query);
+            }
+        });
+
+        // Cargar videojuegos al inicio
         fetchGames();
     </script>
 </body>
