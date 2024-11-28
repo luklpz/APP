@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLAYTON Videojuegos</title>
+    <title>Videojuegos RAWG</title>
     <style>
         /* Estilos básicos */
         body {
@@ -20,6 +20,7 @@
             padding: 20px;
             display: flex;
             justify-content: space-between;
+            flex-direction: column; /* Cambio para que los elementos se apilen */
             align-items: flex-start;
             flex-wrap: wrap;
         }
@@ -33,6 +34,7 @@
             margin-top: 10px;
             display: flex;
             flex-grow: 1;
+            width: 100%;
         }
 
         .search-bar {
@@ -49,14 +51,16 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-left: 20px; /* Separación entre géneros y la barra de búsqueda */
-            max-width: 40%;
+            margin-top: 10px;
+            width: 100%;
+            visibility: visible;
         }
 
         .genre-item {
             display: flex;
             align-items: center;
             color: white;
+            flex: 1 1 20%;
         }
 
         .genre-item input {
@@ -131,13 +135,55 @@
             height: 24px;
             filter: brightness(2); /* Iconos blancos */
         }
+
+        /* Estilos para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .search-bar-container {
+                max-width: 100%; /* La barra de búsqueda ocupa todo el ancho */
+            }
+
+            .genre-container {
+                display: none; /* Los géneros están ocultos por defecto */
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .genre-container.open {
+                display: flex; /* Se muestra cuando está abierto */
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .header .search-bar-container {
+                width: 100%;
+            }
+
+            /* Estilo del botón de filtros */
+            .filter-toggle-button {
+                background-color: #4a148c;
+                color: white;
+                border: none;
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                display: block;
+                margin-top: 10px;
+            }
+
+            .filter-toggle-button img {
+                width: 24px;
+                height: 24px;
+                margin-right: 5px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Cabecera -->
     <header class="header">
         <div>
-            <h1 class="header-title">PLAYTON Videojuegos</h1>
+            <h1 class="header-title">Videojuegos RAWG</h1>
             <div class="search-bar-container">
                 <input
                     type="text"
@@ -150,6 +196,10 @@
         <div class="genre-container" id="genreContainer">
             <!-- Géneros dinámicamente generados -->
         </div>
+        <button class="filter-toggle-button" id="filterToggleButton">
+            <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Abrir filtros" id="filterIcon">
+            Filtros
+        </button>
     </header>
 
     <!-- Contenedor de juegos -->
@@ -174,6 +224,8 @@
         const searchBar = document.getElementById("searchBar");
         const gamesContainer = document.getElementById("gamesContainer");
         const genreContainer = document.getElementById("genreContainer");
+        const filterToggleButton = document.getElementById("filterToggleButton");
+        const filterIcon = document.getElementById("filterIcon");
 
         let currentPage = 1;
         let query = "";
@@ -261,8 +313,18 @@
             }
         });
 
+        // Botón para abrir/cerrar los filtros
+        filterToggleButton.addEventListener("click", () => {
+            genreContainer.classList.toggle("open");
+            const isOpen = genreContainer.classList.contains("open");
+            filterIcon.src = isOpen
+                ? "https://cdn-icons-png.flaticon.com/512/561/561126.png"  // Correo abierto
+                : "https://cdn-icons-png.flaticon.com/512/561/561127.png"; // Correo cerrado
+        });
+
         fetchGenres();
         fetchGames(currentPage);
     </script>
 </body>
 </html>
+
