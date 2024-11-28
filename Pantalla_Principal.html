@@ -107,6 +107,30 @@
             color: #666;
         }
 
+        /* Barra de paginación */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4a148c;
+            border-radius: 5px;
+        }
+
+        .pagination button {
+            background-color: #fff;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .pagination button:hover {
+            background-color: #ddd;
+        }
+
         /* Footer */
         .footer {
             background-color: #4a148c;
@@ -207,6 +231,11 @@
         <!-- Juegos dinámicamente renderizados -->
     </div>
 
+    <!-- Barra de paginación -->
+    <div class="pagination" id="pagination">
+        <!-- Botones de paginación se agregarán dinámicamente -->
+    </div>
+
     <!-- Footer -->
     <div class="footer">
         <a href="#" class="footer-icon active">
@@ -226,10 +255,12 @@
         const genreContainer = document.getElementById("genreContainer");
         const filterToggleButton = document.getElementById("filterToggleButton");
         const filterIcon = document.getElementById("filterIcon");
+        const pagination = document.getElementById("pagination");
 
         let currentPage = 1;
         let query = "";
         let selectedGenres = [];
+        let totalPages = 1; // Para gestionar el número total de páginas
 
         async function fetchGenres() {
             const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
@@ -258,34 +289,29 @@
         async function fetchGames(page = 1, searchQuery = "", genres = []) {
             let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
-                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}${genreQuery}`
-                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}${genreQuery}`;
+                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=10&search=${searchQuery}${genreQuery}`
+                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=10${genreQuery}`;
 
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) {
-                    throw new Error(`Error en la solicitud: ${response.status}`);
-                }
-
                 const data = await response.json();
+                totalPages = data.pagination.pages; // Actualizar el número total de páginas
                 renderGames(data.results);
+                renderPagination();
             } catch (error) {
-                console.error("Error al obtener los juegos:", error);
-                gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
+                console.error("Error al obtener juegos:", error);
             }
         }
 
         function renderGames(games) {
             gamesContainer.innerHTML = "";
-
             games.forEach(game => {
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
-
                 gameCard.innerHTML = `
-                    <img src="${game.background_image}" alt="${game.name}" class="game-image">
+                    <img src="${game.background_image}" alt="${game.name}" />
                     <h3 class="game-title">${game.name}</h3>
-                    <p class="game-rating">Puntuación: ${game.rating}</p>
+                    <p class="game-score">Rating: ${game.rating}</p>
                 `;
 
                 gameCard.addEventListener("click", () => {
@@ -295,6 +321,32 @@
 
                 gamesContainer.appendChild(gameCard);
             });
+        }
+
+        function renderPagination() {
+            pagination.innerHTML = "";
+            const prevButton = document.createElement("button");
+            prevButton.textContent = "Anterior";
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchGames(currentPage, query, selectedGenres);
+                }
+            });
+
+            const nextButton = document.createElement("button");
+            nextButton.textContent = "Siguiente";
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener("click", () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    fetchGames(currentPage, query, selectedGenres);
+                }
+            });
+
+            pagination.appendChild(prevButton);
+            pagination.appendChild(nextButton);
         }
 
         searchBar.addEventListener("input", () => {
@@ -327,4 +379,3 @@
     </script>
 </body>
 </html>
-
