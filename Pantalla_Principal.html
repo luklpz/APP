@@ -32,6 +32,24 @@
             outline: none;
         }
 
+        /* Botón lupa para abrir el menú */
+        .search-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 24px;
+            z-index: 1100;
+            color: white;
+        }
+
+        .search-icon {
+            width: 30px;
+            height: auto;
+        }
+
         /* Menú de géneros */
         .genre-menu {
             display: none; /* Inicialmente oculto */
@@ -40,7 +58,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 5px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 20px;
             box-sizing: border-box;
@@ -75,18 +95,18 @@
         }
 
         .genre-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Distribuir casillas uniformemente */
-            gap: 15px; /* Espaciado entre casillas */
             margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
         }
 
-        .genre-item label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 16px;
-            cursor: pointer;
+        .genre-item {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
         }
 
         .apply-filters {
@@ -148,14 +168,14 @@
         /* Ajuste para la paginación */
         .pagination-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px 0;
+            justify-content: center; /* Centrar horizontalmente */
+            align-items: center;    /* Centrar verticalmente */
+            padding: 10px 0;        /* Reducir el padding superior/inferior */
             background-color: #f4f4f4;
             position: fixed;
-            bottom: 60px;
+            bottom: 60px;           /* Espacio para no superponer el footer */
             width: 100%;
-            z-index: 1000;
+            z-index: 1000;          /* Asegurarse de que está sobre otros elementos */
             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
 
@@ -167,8 +187,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: #4a148c;
+            font-size: 24px; /* Tamaño claro y visible */
+            color: #4a148c; /* Morado para las flechas */
         }
 
         .pagination-container button:disabled {
@@ -177,10 +197,10 @@
         }
 
         .pagination-container .page-number {
-            font-size: 18px;
-            color: #4a148c;
+            font-size: 18px; /* Tamaño del número */
+            color: #4a148c;  /* Morado para el número */
             font-weight: bold;
-            margin: 0 20px;
+            margin: 0 20px; /* Espaciado entre flechas */
         }
 
         /* Footer */
@@ -209,7 +229,7 @@
         .footer-icon img {
             width: 24px;
             height: 24px;
-            filter: brightness(2);
+            filter: brightness(2); /* Iconos blancos */
         }
 
         .footer-icon.active img {
@@ -218,172 +238,181 @@
     </style>
 </head>
 <body>
-    <!-- Contenedor de juegos -->
-    <div class="games-container" id="gamesContainer">
-        <!-- Juegos dinámicamente renderizados -->
+    <!-- Barra de búsqueda -->
+    <div class="search-bar-container">
+        <input
+            type="text"
+            id="searchBar"
+            class="search-bar"
+            placeholder="Buscar videojuegos..."
+        />
     </div>
 
-    <!-- Menú de géneros -->
+    <!-- Menú desplegable de géneros -->
     <div id="genreMenu" class="genre-menu">
         <div class="genre-menu-header">
             <button id="closeButton" class="close-button">Cerrar</button>
             <h2>Selecciona los géneros</h2>
         </div>
         <div class="genre-list">
-            <!-- Géneros dinámicamente renderizados -->
+            <!-- Aquí se agregarán los géneros dinámicamente -->
         </div>
         <button id="applyFilters" class="apply-filters">Aplicar filtros</button>
+    </div>
+
+    <!-- Contenedor de juegos -->
+    <div class="games-container" id="gamesContainer">
+        <!-- Juegos dinámicamente renderizados -->
+    </div>
+
+    <!-- Controles de paginación -->
+    <div class="pagination-container">
+        <button id="prevPage" aria-label="Página anterior" disabled>
+            &#9664; <!-- Flecha izquierda -->
+        </button>
+        <span id="pageNumber" class="page-number">1</span>
+        <button id="nextPage" aria-label="Página siguiente">
+            &#9654; <!-- Flecha derecha -->
+        </button>
     </div>
 
     <!-- Footer -->
     <div class="footer">
         <a href="#" class="footer-icon">
-            <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Inicio">
-            <span>Inicio</span>
-        </a>
-        <a href="#" id="footerSearchButton" class="footer-icon">
             <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Buscar">
-            <span>Buscar</span>
+            
         </a>
     </div>
 
-
     <script>
         const API_KEY = "eb11169dd6c9489da08da5fa4e46df6a";
-    
         const searchBar = document.getElementById("searchBar");
         const gamesContainer = document.getElementById("gamesContainer");
         const prevPageButton = document.getElementById("prevPage");
         const nextPageButton = document.getElementById("nextPage");
         const pageNumberDisplay = document.getElementById("pageNumber");
-    
-        const footerSearchButton = document.getElementById("footerSearchButton");
+        const menuToggle = document.getElementById("menuToggle");
         const genreMenu = document.getElementById("genreMenu");
         const closeButton = document.getElementById("closeButton");
         const applyFiltersButton = document.getElementById("applyFilters");
         const genreList = document.querySelector(".genre-list");
-    
+
         let currentPage = 1;
         let query = "";
         let selectedGenres = [];
-    
+
+        async function fetchGenres() {
+            const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                renderGenres(data.results);
+            } catch (error) {
+                console.error("Error al obtener géneros:", error);
+            }
+        }
+
+        function renderGenres(genres) {
+            genreList.innerHTML = "";
+            genres.forEach(genre => {
+                const genreItem = document.createElement("div");
+                genreItem.classList.add("genre-item");
+                genreItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${genre.id}" /> ${genre.name}
+                    </label>
+                `;
+                genreList.appendChild(genreItem);
+            });
+        }
+
         async function fetchGames(page = 1, searchQuery = "", genres = []) {
-            const genreQuery = genres.length > 0 ? `&genres=${genres.join(",")}` : "";
+            let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
                 ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}${genreQuery}`
                 : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}${genreQuery}`;
-    
+
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.status}`);
                 }
-    
+
                 const data = await response.json();
                 renderGames(data.results);
-    
+
                 pageNumberDisplay.textContent = page;
-                prevPageButton.disabled = page === 1; // Deshabilitar si es la primera página
+                prevPageButton.disabled = page === 1;
             } catch (error) {
                 console.error("Error al obtener los juegos:", error);
                 gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
             }
         }
-    
-        async function fetchGenres() {
-            const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) {
-                    throw new Error(`Error en la solicitud: ${response.status}`);
-                }
-    
-                const data = await response.json();
-                renderGenres(data.results);
-            } catch (error) {
-                console.error("Error al obtener los géneros:", error);
-            }
-        }
-    
+
         function renderGames(games) {
             gamesContainer.innerHTML = "";
-    
+
             games.forEach(game => {
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
-    
+
                 gameCard.innerHTML = `
                     <img src="${game.background_image}" alt="${game.name}" class="game-image">
                     <h3 class="game-title">${game.name}</h3>
                     <p class="game-rating">Puntuación: ${game.rating}</p>
                 `;
-    
-                // Agregar evento de clic para redirigir a Pantalla Videojuego
+
                 gameCard.addEventListener("click", () => {
-                    localStorage.setItem("selectedGameId", game.id); // Guardar el ID del juego en localStorage
-                    window.location.href = "pantalla-videojuego.html"; // Redirigir
+                    localStorage.setItem("selectedGameId", game.id);
+                    window.location.href = "pantalla-videojuego.html";
                 });
-    
+
                 gamesContainer.appendChild(gameCard);
             });
         }
-    
-        function renderGenres(genres) {
-            genreList.innerHTML = "";
-    
-            genres.forEach(genre => {
-                const genreItem = document.createElement("div");
-                genreItem.classList.add("genre-item");
-    
-                genreItem.innerHTML = `
-                    <label>
-                        <input type="checkbox" value="${genre.slug}">
-                        ${genre.name}
-                    </label>
-                `;
-    
-                genreList.appendChild(genreItem);
-            });
-        }
-    
+
+
         prevPageButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
                 fetchGames(currentPage, query, selectedGenres);
             }
         });
-    
+
         nextPageButton.addEventListener("click", () => {
             currentPage++;
             fetchGames(currentPage, query, selectedGenres);
         });
-    
+
+        // Abrir el menú de géneros
+        menuToggle.addEventListener("click", (e) => {
+            e.preventDefault(); // Evitar la navegación por el enlace
+            genreMenu.style.display = "block"; // Mostrar el menú de géneros
+        });
+
+        // Cerrar el menú al hacer clic en "Cerrar"
+        closeButton.addEventListener("click", () => {
+            genreMenu.style.display = "none"; // Ocultar el menú de géneros
+        });
+
+
+        // Aplicar los filtros seleccionados
+        applyFiltersButton.addEventListener("click", () => {
+            selectedGenres = [];
+            const checkboxes = document.querySelectorAll(".genre-item input:checked");
+            checkboxes.forEach((checkbox) => selectedGenres.push(checkbox.value));
+            genreMenu.style.display = "none"; // Cerrar el menú después de aplicar los filtros
+            fetchGames(currentPage, query, selectedGenres); // Recargar juegos con los filtros
+        });
+
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
             currentPage = 1;
             fetchGames(currentPage, query, selectedGenres);
         });
-    
-        footerSearchButton.addEventListener("click", () => {
-            genreMenu.style.display = "block"; // Mostrar el menú de géneros
-        });
-    
-        closeButton.addEventListener("click", () => {
-            genreMenu.style.display = "none"; // Cerrar el menú
-        });
-    
-        applyFiltersButton.addEventListener("click", () => {
-            selectedGenres = Array.from(
-                document.querySelectorAll(".genre-item input:checked")
-            ).map(checkbox => checkbox.value);
-    
-            genreMenu.style.display = "none"; // Cerrar después de aplicar filtros
-            currentPage = 1;
-            fetchGames(currentPage, query, selectedGenres);
-        });
-    
-        fetchGames(currentPage);
+
         fetchGenres();
+        fetchGames(currentPage);
     </script>
 </body>
 </html>
