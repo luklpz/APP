@@ -38,10 +38,9 @@
             border: none;
             cursor: pointer;
             position: absolute;
-            bottom: 10px;
+            top: 10px;
             right: 10px;
             font-size: 24px;
-            z-index: 1100;
             color: white;
         }
 
@@ -58,8 +57,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 5px;
-            text-align: center;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 20px;
@@ -96,17 +93,10 @@
 
         .genre-list {
             margin-bottom: 20px;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
         }
 
         .genre-item {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
+            margin-bottom: 10px;
         }
 
         .apply-filters {
@@ -246,6 +236,9 @@
             class="search-bar"
             placeholder="Buscar videojuegos..."
         />
+        <button id="searchButton" class="search-button">
+            <img src="lupa-icono.svg" alt="Buscar" class="search-icon">
+        </button>
     </div>
 
     <!-- Menú desplegable de géneros -->
@@ -278,9 +271,13 @@
 
     <!-- Footer -->
     <div class="footer">
+        <a href="#" class="footer-icon active">
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Inicio">
+            <span>Inicio</span>
+        </a>
         <a href="#" class="footer-icon">
             <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Buscar">
-            
+            <span>Buscar</span>
         </a>
     </div>
 
@@ -291,7 +288,7 @@
         const prevPageButton = document.getElementById("prevPage");
         const nextPageButton = document.getElementById("nextPage");
         const pageNumberDisplay = document.getElementById("pageNumber");
-        const menuToggle = document.getElementById("menuToggle");
+        const searchButton = document.getElementById("searchButton");
         const genreMenu = document.getElementById("genreMenu");
         const closeButton = document.getElementById("closeButton");
         const applyFiltersButton = document.getElementById("applyFilters");
@@ -371,7 +368,6 @@
             });
         }
 
-
         prevPageButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -384,25 +380,20 @@
             fetchGames(currentPage, query, selectedGenres);
         });
 
-        // Abrir el menú de géneros
-        menuToggle.addEventListener("click", (e) => {
-            e.preventDefault(); // Evitar la navegación por el enlace
+        searchButton.addEventListener("click", () => {
             genreMenu.style.display = "block"; // Mostrar el menú de géneros
         });
 
-        // Cerrar el menú al hacer clic en "Cerrar"
         closeButton.addEventListener("click", () => {
-            genreMenu.style.display = "none"; // Ocultar el menú de géneros
+            genreMenu.style.display = "none"; // Cerrar el menú
         });
 
-
-        // Aplicar los filtros seleccionados
         applyFiltersButton.addEventListener("click", () => {
             selectedGenres = [];
             const checkboxes = document.querySelectorAll(".genre-item input:checked");
-            checkboxes.forEach((checkbox) => selectedGenres.push(checkbox.value));
-            genreMenu.style.display = "none"; // Cerrar el menú después de aplicar los filtros
-            fetchGames(currentPage, query, selectedGenres); // Recargar juegos con los filtros
+            checkboxes.forEach(checkbox => selectedGenres.push(checkbox.value));
+            genreMenu.style.display = "none";
+            fetchGames(currentPage, query, selectedGenres);
         });
 
         searchBar.addEventListener("input", () => {
