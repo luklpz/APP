@@ -33,6 +33,7 @@
             margin-top: 10px;
             display: flex;
             flex-grow: 1;
+            max-width: 60%;
         }
 
         .search-bar {
@@ -51,6 +52,7 @@
             gap: 10px;
             margin-left: 20px; /* Separación entre géneros y la barra de búsqueda */
             max-width: 40%;
+            visibility: visible;
         }
 
         .genre-item {
@@ -132,26 +134,45 @@
             filter: brightness(2); /* Iconos blancos */
         }
 
-        /* Paginación */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
+        /* Estilos para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .search-bar-container {
+                max-width: 100%; /* La barra de búsqueda ocupa todo el ancho */
+            }
 
-        .pagination button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: none;
-            background-color: #4a148c;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+            .genre-container {
+                display: none; /* Los géneros están ocultos por defecto */
+                width: 100%;
+                margin-top: 10px;
+            }
 
-        .pagination button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+            .genre-container.open {
+                display: flex; /* Se muestra cuando está abierto */
+                flex-direction: column;
+            }
+
+            .header .search-bar-container {
+                width: 100%;
+            }
+
+            /* Estilo del botón de filtros */
+            .filter-toggle-button {
+                background-color: #4a148c;
+                color: white;
+                border: none;
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                display: block;
+                margin-top: 10px;
+            }
+
+            .filter-toggle-button img {
+                width: 24px;
+                height: 24px;
+                margin-right: 5px;
+            }
         }
     </style>
 </head>
@@ -172,16 +193,15 @@
         <div class="genre-container" id="genreContainer">
             <!-- Géneros dinámicamente generados -->
         </div>
+        <button class="filter-toggle-button" id="filterToggleButton">
+            <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Abrir filtros" id="filterIcon">
+            Filtros
+        </button>
     </header>
 
     <!-- Contenedor de juegos -->
     <div class="games-container" id="gamesContainer">
         <!-- Juegos dinámicamente renderizados -->
-    </div>
-
-    <!-- Paginación -->
-    <div id="pagination" class="pagination">
-        <!-- Paginación dinámica -->
     </div>
 
     <!-- Footer -->
@@ -201,12 +221,12 @@
         const searchBar = document.getElementById("searchBar");
         const gamesContainer = document.getElementById("gamesContainer");
         const genreContainer = document.getElementById("genreContainer");
-        const pagination = document.getElementById("pagination");
+        const filterToggleButton = document.getElementById("filterToggleButton");
+        const filterIcon = document.getElementById("filterIcon");
 
         let currentPage = 1;
         let query = "";
         let selectedGenres = [];
-        let totalPages = 1; // Para gestionar el número total de páginas
 
         async function fetchGenres() {
             const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
@@ -235,21 +255,17 @@
         async function fetchGames(page = 1, searchQuery = "", genres = []) {
             let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
-                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=10&search=${searchQuery}${genreQuery}`
-                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=10${genreQuery}`;
+                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}${genreQuery}`
+                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}${genreQuery}`;
 
             try {
-                console.log("Fetching URL:", API_URL); // Depuración: Ver URL de la API que se está solicitando
                 const response = await fetch(API_URL);
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log("Datos recibidos:", data); // Depuración: Mostrar los datos recibidos de la API
-                totalPages = data.pagination.pages; // Actualizar el número total de páginas
                 renderGames(data.results);
-                renderPagination();
             } catch (error) {
                 console.error("Error al obtener los juegos:", error);
                 gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
@@ -258,13 +274,15 @@
 
         function renderGames(games) {
             gamesContainer.innerHTML = "";
+
             games.forEach(game => {
                 const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
+
                 gameCard.innerHTML = `
-                    <img src="${game.background_image}" alt="${game.name}" />
+                    <img src="${game.background_image}" alt="${game.name}" class="game-image">
                     <h3 class="game-title">${game.name}</h3>
-                    <p class="game-score">Rating: ${game.rating}</p>
+                    <p class="game-rating">Puntuación: ${game.rating}</p>
                 `;
 
                 gameCard.addEventListener("click", () => {
@@ -274,32 +292,6 @@
 
                 gamesContainer.appendChild(gameCard);
             });
-        }
-
-        function renderPagination() {
-            pagination.innerHTML = "";
-            const prevButton = document.createElement("button");
-            prevButton.textContent = "Anterior";
-            prevButton.disabled = currentPage === 1;
-            prevButton.addEventListener("click", () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    fetchGames(currentPage, query, selectedGenres);
-                }
-            });
-
-            const nextButton = document.createElement("button");
-            nextButton.textContent = "Siguiente";
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.addEventListener("click", () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    fetchGames(currentPage, query, selectedGenres);
-                }
-            });
-
-            pagination.appendChild(prevButton);
-            pagination.appendChild(nextButton);
         }
 
         searchBar.addEventListener("input", () => {
@@ -318,8 +310,17 @@
             }
         });
 
-        fetchGenres(); // Inicializar la carga de géneros
-        fetchGames(currentPage); // Inicializar la carga de juegos
+        // Botón para abrir/cerrar los filtros
+        filterToggleButton.addEventListener("click", () => {
+            genreContainer.classList.toggle("open");
+            const isOpen = genreContainer.classList.contains("open");
+            filterIcon.src = isOpen
+                ? "https://cdn-icons-png.flaticon.com/512/561/561126.png"  // Correo abierto
+                : "https://cdn-icons-png.flaticon.com/512/561/561127.png"; // Correo cerrado
+        });
+
+        fetchGenres();
+        fetchGames(currentPage);
     </script>
 </body>
 </html>
