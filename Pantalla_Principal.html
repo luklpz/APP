@@ -64,6 +64,7 @@
         .genre-item input {
             margin-right: 5px;
         }
+        
 
         /* Contenedor de juegos */
         .games-container {
@@ -143,6 +144,12 @@
                 width: 24px;
                 height: auto;
                 max-width: 100%;
+            }
+            /* Ocultar el botón en pantallas grandes */
+            @media (min-width: 769px) {
+                .filter-toggle-button {
+                    display: none;
+                }
             }
         }
     </style>
