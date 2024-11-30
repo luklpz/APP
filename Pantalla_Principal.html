@@ -152,6 +152,35 @@
                     display: none;
                 }
             }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .pagination-btn {
+        background-color: #4a148c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 20px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .pagination-btn:hover {
+        background-color: #6a1b9a;
+    }
+
+    .pagination-number {
+        margin: 0 20px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #4a148c;
+    }
     </style>
 </head>
 <body>
@@ -181,6 +210,12 @@
     <div class="games-container" id="gamesContainer">
         <!-- Juegos dinámicamente renderizados -->
     </div>
+    <!-- Navegación de páginas -->
+    <div class="pagination" id="paginationContainer">
+        <button id="prevPage" class="pagination-btn" style="visibility: hidden;">&#9664;</button>
+        <span id="currentPage" class="pagination-number">1</span>
+        <button id="nextPage" class="pagination-btn">&#9654;</button>
+    </div>
     <script>
         const API_KEY = "4b746f49329f467f96fe53baeeb336e3";
         const searchBar = document.getElementById("searchBar");
@@ -188,10 +223,15 @@
         const genreContainer = document.getElementById("genreContainer");
         const filterToggleButton = document.getElementById("filterToggleButton");
         const filterIcon = document.getElementById("filterIcon");
+        const paginationContainer = document.getElementById("paginationContainer");
+        const prevPageButton = document.getElementById("prevPage");
+        const nextPageButton = document.getElementById("nextPage");
+        const currentPageDisplay = document.getElementById("currentPage");
 
         let currentPage = 1;
         let query = "";
         let selectedGenres = [];
+        let displayedGames = new Set(); // Rastrea los juegos ya mostrados
 
         async function fetchGenres() {
             const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
@@ -230,7 +270,17 @@
                 }
 
                 const data = await response.json();
-                renderGames(data.results);
+                
+                // Filtrar juegos ya mostrados
+                const newGames = data.results.filter(game => !displayedGames.has(game.id));
+                newGames.forEach(game => displayedGames.add(game.id));
+
+                renderGames(newGames);
+
+                // Actualizar estado de botones de paginación
+                prevPageButton.style.visibility = page > 1 ? "visible" : "hidden";
+                currentPageDisplay.textContent = page;
+
             } catch (error) {
                 console.error("Error al obtener los juegos:", error);
                 gamesContainer.innerHTML = `<p>Error al cargar los videojuegos. Inténtalo de nuevo más tarde.</p>`;
@@ -239,6 +289,11 @@
 
         function renderGames(games) {
             gamesContainer.innerHTML = "";
+
+            if (games.length === 0) {
+                gamesContainer.innerHTML = `<p>No hay más juegos para mostrar.</p>`;
+                return;
+            }
 
             games.forEach(game => {
                 const gameCard = document.createElement("div");
@@ -259,9 +314,11 @@
             });
         }
 
+        // Eventos de búsqueda y filtrado
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
             currentPage = 1;
+            displayedGames.clear(); // Reiniciar juegos mostrados
             fetchGames(currentPage, query, selectedGenres);
         });
 
@@ -271,8 +328,22 @@
                     genreContainer.querySelectorAll("input:checked")
                 ).map(input => input.value);
                 currentPage = 1;
+                displayedGames.clear(); // Reiniciar juegos mostrados
                 fetchGames(currentPage, query, selectedGenres);
             }
+        });
+
+        // Paginación
+        prevPageButton.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchGames(currentPage, query, selectedGenres);
+            }
+        });
+
+        nextPageButton.addEventListener("click", () => {
+            currentPage++;
+            fetchGames(currentPage, query, selectedGenres);
         });
 
         // Botón para abrir/cerrar los filtros
