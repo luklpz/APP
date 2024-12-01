@@ -81,6 +81,7 @@
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
+            cursor: pointer;
         }
 
         .game-card:hover {
@@ -386,6 +387,19 @@
                 gamesPerPage = customValue; // Actualiza la cantidad de juegos con el valor personalizado
                 currentPage = 1;
                 fetchGames(currentPage, query, selectedGenres); // Recarga los juegos
+            }
+        });
+
+        // Alternar visibilidad de los géneros al hacer clic en el botón
+        filterToggleButton.addEventListener("click", () => {
+            const isOpen = genreContainer.classList.contains("open");
+
+            if (isOpen) {
+                genreContainer.classList.remove("open");
+                filterIcon.src = "envelope.png"; // Icono cerrado
+            } else {
+                genreContainer.classList.add("open");
+                filterIcon.src = "envelope-open.png"; // Icono abierto
             }
         });
 
