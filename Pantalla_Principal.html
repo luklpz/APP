@@ -268,6 +268,12 @@
         let gamesPerPage = parseInt(gamesPerPageSelect.value); // Por defecto, 10 juegos por página
         const pageData = {}; // Almacena juegos por página
 
+        function getSelectedGenres() {
+            return Array.from(
+                genreContainer.querySelectorAll("input:checked")
+            ).map(input => input.value);
+        }
+
         async function fetchGenres() {
             const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
             try {
@@ -293,6 +299,7 @@
         }
 
         async function fetchGames(page = 1, searchQuery = "", genres = []) {
+            // Construir la URL con los géneros seleccionados
             let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
                 ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=${gamesPerPage}&search=${searchQuery}${genreQuery}`
@@ -302,11 +309,15 @@
                 const response = await fetch(API_URL);
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.status}`);
-                }
+               }
 
                 const data = await response.json();
-                pageData[page] = data.results; // Almacena los juegos para esta página
-                renderGames(pageData[page]);
+                if (data.results.length === 0) {
+                    gamesContainer.innerHTML = `<p>No se encontraron juegos con los filtros seleccionados.</p>`;
+                } else {
+                    pageData[page] = data.results; // Almacena los juegos para esta página
+                    renderGames(pageData[page]); // Renderiza los juegos
+                }
 
                 // Actualizar estado de botones de paginación
                 prevPageButton.style.visibility = page > 1 ? "visible" : "hidden";
@@ -318,16 +329,17 @@
             }
         }
 
+
         function renderGames(games) {
-            gamesContainer.innerHTML = "";
+            gamesContainer.innerHTML = ""; // Limpia el contenedor antes de renderizar
 
             if (games.length === 0) {
-                gamesContainer.innerHTML = `<p>No hay más juegos para mostrar.</p>`;
+                gamesContainer.innerHTML = `<p>No hay juegos disponibles para los filtros seleccionados.</p>`;
                 return;
             }
 
-            games.forEach(game => {
-                const gameCard = document.createElement("div");
+           games.forEach(game => {
+               const gameCard = document.createElement("div");
                 gameCard.classList.add("game-card");
 
                 gameCard.innerHTML = `
@@ -345,22 +357,19 @@
             });
         }
 
+
         // Eventos de búsqueda y filtrado
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
-            currentPage = 1;
-            pageData = {}; // Reiniciar juegos almacenados
-            fetchGames(currentPage, query, selectedGenres);
+            currentPage = 1; // Reinicia la página al aplicar una búsqueda
+            fetchGames(currentPage, query, selectedGenres); // Realiza la nueva consulta
         });
 
         genreContainer.addEventListener("change", (event) => {
             if (event.target.type === "checkbox") {
-                selectedGenres = Array.from(
-                    genreContainer.querySelectorAll("input:checked")
-                ).map(input => input.value);
-                currentPage = 1;
-                pageData = {}; // Reiniciar juegos almacenados
-                fetchGames(currentPage, query, selectedGenres);
+                selectedGenres = getSelectedGenres();
+                currentPage = 1; // Reinicia la página al aplicar nuevos filtros
+                fetchGames(currentPage, query, selectedGenres); // Realiza la nueva consulta
             }
         });
 
@@ -422,7 +431,7 @@
 
         // Inicializar
         fetchGenres();
-        fetchGames(currentPage);
+        fetchGames(currentPage, query, selectedGenres);
     </script>
 </body>
 </html>
