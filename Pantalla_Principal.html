@@ -64,7 +64,6 @@
         .genre-item input {
             margin-right: 5px;
         }
-        
 
         /* Contenedor de juegos */
         .games-container {
@@ -104,6 +103,43 @@
         .game-score {
             font-size: 14px;
             color: #666;
+        }
+
+        /* Selector de cantidad de juegos por página */
+        .page-size-selector {
+            text-align: center;
+            margin: 20px;
+            font-size: 16px;
+        }
+
+        /* Paginación */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .pagination-btn {
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .pagination-btn:hover {
+            background-color: #6a1b9a;
+        }
+
+        .pagination-number {
+            margin: 0 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4a148c;
         }
 
         /* Estilos para pantallas pequeñas */
@@ -146,41 +182,13 @@
                 max-width: 100%;
             }
         }
-        /* Ocultar el botón en pantallas grandes */
+
+        /* Ocultar el botón de filtros en pantallas grandes */
         @media (min-width: 769px) {
-                .filter-toggle-button {
-                    display: none;
-                }
+            .filter-toggle-button {
+                display: none;
             }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 20px 0;
-    }
-
-    .pagination-btn {
-        background-color: #4a148c;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        font-size: 20px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .pagination-btn:hover {
-        background-color: #6a1b9a;
-    }
-
-    .pagination-number {
-        margin: 0 20px;
-        font-size: 20px;
-        font-weight: bold;
-        color: #4a148c;
-    }
+        }
     </style>
 </head>
 <body>
@@ -210,12 +218,34 @@
     <div class="games-container" id="gamesContainer">
         <!-- Juegos dinámicamente renderizados -->
     </div>
+
+    <!-- Selector de cantidad de juegos por página -->
+    <div style="padding: 10px; text-align: center; background-color: #f9f9f9;">
+        <label for="gamesPerPage">Mostrar:</label>
+        <select id="gamesPerPage">
+            <option value="10">10 juegos</option>
+            <option value="25">25 juegos</option>
+            <option value="50">50 juegos</option>
+            <option value="75">75 juegos</option>
+            <option value="100">100 juegos</option>
+            <option value="custom">Personalizado</option>
+        </select>
+        <input
+            type="number"
+            id="customGamesInput"
+            placeholder="Ingresa un número"
+            style="display: none; margin-left: 10px; padding: 5px;"
+            min="1"
+        />
+    </div>
+
     <!-- Navegación de páginas -->
     <div class="pagination" id="paginationContainer">
         <button id="prevPage" class="pagination-btn" style="visibility: hidden;">&#9664;</button>
         <span id="currentPage" class="pagination-number">1</span>
         <button id="nextPage" class="pagination-btn">&#9654;</button>
     </div>
+
     <script>
         const API_KEY = "4b746f49329f467f96fe53baeeb336e3";
         const searchBar = document.getElementById("searchBar");
@@ -228,10 +258,14 @@
         const nextPageButton = document.getElementById("nextPage");
         const currentPageDisplay = document.getElementById("currentPage");
 
+        const gamesPerPageSelect = document.getElementById("gamesPerPage");
+        const customGamesInput = document.getElementById("customGamesInput");
+
         let currentPage = 1;
         let query = "";
         let selectedGenres = [];
-        let displayedGames = new Set(); // Rastrea los juegos ya mostrados
+        let gamesPerPage = parseInt(gamesPerPageSelect.value); // Por defecto, 10 juegos por página
+        const pageData = {}; // Almacena juegos por página
 
         async function fetchGenres() {
             const API_URL = `https://api.rawg.io/api/genres?key=${API_KEY}`;
@@ -260,8 +294,8 @@
         async function fetchGames(page = 1, searchQuery = "", genres = []) {
             let genreQuery = genres.length ? `&genres=${genres.join(",")}` : "";
             const API_URL = searchQuery
-                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&search=${searchQuery}${genreQuery}`
-                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}${genreQuery}`;
+                ? `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=${gamesPerPage}&search=${searchQuery}${genreQuery}`
+                : `https://api.rawg.io/api/games?key=${API_KEY}&page=${page}&page_size=${gamesPerPage}${genreQuery}`;
 
             try {
                 const response = await fetch(API_URL);
@@ -270,12 +304,8 @@
                 }
 
                 const data = await response.json();
-                
-                // Filtrar juegos ya mostrados
-                const newGames = data.results.filter(game => !displayedGames.has(game.id));
-                newGames.forEach(game => displayedGames.add(game.id));
-
-                renderGames(newGames);
+                pageData[page] = data.results; // Almacena los juegos para esta página
+                renderGames(pageData[page]);
 
                 // Actualizar estado de botones de paginación
                 prevPageButton.style.visibility = page > 1 ? "visible" : "hidden";
@@ -318,7 +348,7 @@
         searchBar.addEventListener("input", () => {
             query = searchBar.value.trim();
             currentPage = 1;
-            displayedGames.clear(); // Reiniciar juegos mostrados
+            pageData = {}; // Reiniciar juegos almacenados
             fetchGames(currentPage, query, selectedGenres);
         });
 
@@ -328,33 +358,55 @@
                     genreContainer.querySelectorAll("input:checked")
                 ).map(input => input.value);
                 currentPage = 1;
-                displayedGames.clear(); // Reiniciar juegos mostrados
+                pageData = {}; // Reiniciar juegos almacenados
                 fetchGames(currentPage, query, selectedGenres);
+            }
+        });
+
+        // Selector de cantidad de juegos por página
+        gamesPerPageSelect.addEventListener("change", () => {
+            const selectedValue = gamesPerPageSelect.value;
+
+            if (selectedValue === "custom") {
+                customGamesInput.style.display = "inline-block"; // Muestra el campo de entrada
+                customGamesInput.focus(); // Enfoca el campo de entrada
+            } else {
+                customGamesInput.style.display = "none"; // Oculta el campo de entrada
+                gamesPerPage = parseInt(selectedValue); // Actualiza la cantidad de juegos
+                currentPage = 1;
+                fetchGames(currentPage, query, selectedGenres); // Recarga los juegos
+            }
+        });
+
+        // Manejo del campo personalizado
+        customGamesInput.addEventListener("input", () => {
+            const customValue = parseInt(customGamesInput.value);
+
+            if (!isNaN(customValue) && customValue > 0) {
+                gamesPerPage = customValue; // Actualiza la cantidad de juegos con el valor personalizado
+                currentPage = 1;
+                fetchGames(currentPage, query, selectedGenres); // Recarga los juegos
             }
         });
 
         // Paginación
+        // Botón anterior (retroceder una página)
         prevPageButton.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
+            if (currentPage > 1) { // Asegurarse de que no baje de 1
+                currentPage--; // Decrementa la página
                 fetchGames(currentPage, query, selectedGenres);
+                pageNumberDisplay.textContent = currentPage; // Actualiza el número de página
             }
         });
 
+        // Botón siguiente (avanzar una página)
         nextPageButton.addEventListener("click", () => {
-            currentPage++;
+            currentPage++; // Incrementa la página
             fetchGames(currentPage, query, selectedGenres);
+            pageNumberDisplay.textContent = currentPage; // Actualiza el número de página
         });
 
-        // Botón para abrir/cerrar los filtros
-        filterToggleButton.addEventListener("click", () => {
-            genreContainer.classList.toggle("open");
-            const isOpen = genreContainer.classList.contains("open");
-            filterIcon.src = isOpen
-                ? "https://cdn-icons-png.flaticon.com/512/561/561126.png"  // Correo abierto
-                : "https://cdn-icons-png.flaticon.com/512/561/561127.png"; // Correo cerrado
-        });
-
+        // Inicializar
         fetchGenres();
         fetchGames(currentPage);
     </script>
