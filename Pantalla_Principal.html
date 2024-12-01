@@ -142,53 +142,43 @@
             font-weight: bold;
             color: #4a148c;
         }
-
-        /* Estilos para pantallas pequeñas */
-        @media (max-width: 768px) {
-            .search-bar-container {
-                max-width: 100%; /* La barra de búsqueda ocupa todo el ancho */
-            }
-
-            .genre-container {
-                display: none; /* Los géneros están ocultos por defecto */
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .genre-container.open {
-                display: flex; /* Se muestra cuando está abierto */
-                flex-direction: column;
-            }
-
-            .header .search-bar-container {
-                width: 100%;
-            }
-
-            /* Estilo del botón de filtros */
-            .filter-toggle-button {
-                background-color: #4a148c;
-                color: white;
-                border: none;
-                padding: 10px;
-                font-size: 16px;
-                border-radius: 5px;
-                cursor: pointer;
-                display: block;
-                margin-top: 10px;
-            }
-
-            .filter-toggle-button img {
-                width: 24px;
-                height: auto;
-                max-width: 100%;
-            }
+        
+        .search-bar-container {
+            max-width: 100%; /* La barra de búsqueda ocupa todo el ancho */
         }
 
-        /* Ocultar el botón de filtros en pantallas grandes */
-        @media (min-width: 769px) {
-            .filter-toggle-button {
-                display: none;
-            }
+        .genre-container {
+            display: none; /* Los géneros están ocultos por defecto */
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .genre-container.open {
+            display: flex; /* Se muestra cuando está abierto */
+            flex-direction: column;
+        }
+
+        .header .search-bar-container {
+            width: 100%;
+        }
+
+        /* Estilo del botón de filtros */
+        .filter-toggle-button {
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .filter-toggle-button img {
+            width: 24px;
+            height: auto;
+            max-width: 100%;
         }
     </style>
 </head>
