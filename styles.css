@@ -1,0 +1,199 @@
+
+/* Estilos básicos */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Cabecera */
+.header {
+    background-color: #4a148c;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.header-title {
+    font-size: 24px;
+    margin: 0;
+}
+
+.search-bar-container {
+    margin-top: 10px;
+    display: flex;
+    flex-grow: 1;
+    max-width: 60%;
+}
+
+.search-bar {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+/* Contenedor de géneros */
+.genre-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: 20px; /* Separación entre géneros y la barra de búsqueda */
+    max-width: 40%;
+    visibility: visible;
+}
+
+.genre-item {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.genre-item input {
+    margin-right: 5px;
+}
+
+/* Contenedor de juegos */
+.games-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.game-card {
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.game-card:hover {
+    transform: scale(1.05);
+}
+
+.game-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.game-title {
+    font-size: 16px;
+    margin: 10px 0 5px 0;
+    font-weight: bold;
+    color: #333;
+}
+
+.game-score {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Selector de cantidad de juegos por página */
+.page-size-selector {
+    text-align: center;
+    margin: 20px;
+    font-size: 16px;
+}
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.pagination-btn {
+    background-color: #4a148c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pagination-btn:hover {
+    background-color: #6a1b9a;
+}
+
+.pagination-number {
+    margin: 0 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #4a148c;
+}
+
+.search-bar-container {
+    max-width: 100%; /* La barra de búsqueda ocupa todo el ancho */
+}
+
+.genre-container {
+    display: none; /* Los géneros están ocultos por defecto */
+    width: 100%;
+    margin-top: 10px;
+}
+
+.genre-container.open {
+    display: flex; /* Se muestra cuando está abierto */
+}
+
+.header .search-bar-container {
+    width: 100%;
+}
+
+/* Estilo del botón de filtros */
+.filter-toggle-button {
+    background-color: #4a148c;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin-top: 10px;
+}
+
+.filter-toggle-button img {
+    width: 24px;
+    height: auto;
+    max-width: 100%;
+}
+#sortButton {
+    background-color: #8725ff4e; /* Morado */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+#sortButton:hover {
+    background-color: #8725ff4e; /* Morado más claro */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05); /* Pequeño aumento */
+}
+
+#sortButton:active {
+    background-color: #8725ff4e; /* Morado más oscuro */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95); /* Ligeramente más pequeño */
+}
